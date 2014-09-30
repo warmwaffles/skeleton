@@ -36,5 +36,87 @@ skeleton = Skeleton.build do |config|
   config.link(name: 'Documentation', rel: 'docs', href: 'https://docs.example.org/resources')
 end
 
-Skeleton::Dump.to_json(skeleton) # => '{ ... }'
+skeleton.to_h
+```
+
+Example `Skeleton::Builder#to_h` call
+
+```ruby
+{
+  "links"=>[],
+  "GET"=>{
+    "description"=>"Display a list of resources",
+    "parameters"=>{
+      "limit"=>{
+        "type"=>"integer",
+        "description"=>"The number of items desired",
+        "required"=>false,
+        "allowed"=>[],
+        "restrictions"=>[
+          "Minimum value is 0",
+          "Maximum value is 9000"
+        ]
+      },
+      "offset"=>{
+        "type"=>"integer",
+        "description"=>"The offset within the collection",
+        "required"=>false,
+        "allowed"=>[],
+        "restrictions"=>[
+          "Minimum value is 0"
+        ]
+      }
+    },
+    "links"=>[
+      {
+        "name"=>"Self",
+        "rel"=>"self",
+        "href"=>"https://api.example.org/resources"
+      }
+    ],
+    "examples"=>[
+      {
+        "limit"=>10,
+        "offset"=>0
+      }
+    ]
+  },
+  "HEAD"=>{
+    "description"=>"Display a list of resources",
+    "parameters"=>{
+      "limit"=>{
+        "type"=>"integer",
+        "description"=>"The number of items desired",
+        "required"=>false,
+        "allowed"=>[],
+        "restrictions"=>[
+          "Minimum value is 0",
+          "Maximum value is 9000"
+        ]
+      },
+      "offset"=>{
+        "type"=>"integer",
+        "description"=>"The offset within the collection",
+        "required"=>false,
+        "allowed"=>[],
+        "restrictions"=>[
+          "Minimum value is 0"
+        ]
+      }
+    },
+    "links"=>[
+      {
+        "name"=>"Self",
+        "rel"=>"self",
+        "href"=>"https://api.example.org/resources"
+      }
+    ],
+    "examples"=>[
+      {
+        "limit"=>10,
+        "offset"=>0
+      }
+    ]
+  }
+}
 ```
