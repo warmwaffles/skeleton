@@ -1,3 +1,5 @@
+require 'multi_json'
+
 require 'skeleton/action'
 require 'skeleton/link'
 
@@ -37,5 +39,9 @@ module Skeleton
       hash
     end
     alias_method :to_hash, :to_h
+
+    def to_json(*)
+      MultiJson.dump(to_h)
+    end
   end
 end
