@@ -13,19 +13,20 @@ module Skeleton
     end
 
     def restriction(desc)
-      @restrictions << desc
+      @restrictions.push(desc)
     end
 
-    def to_hash
+    def to_h
       hash = {
-        type: type,
-        description: description,
-        required: required
+        'type' => type,
+        'description' => description,
+        'required' => required
       }
-      hash[:default] = default if default
-      hash[:allowed] = allowed if allowed
-      hash[:restrictions] = restrictions unless restrictions.empty?
+      hash['default'] = default if default
+      hash['allowed'] = allowed if allowed
+      hash['restrictions'] = restrictions unless restrictions.empty?
       hash
     end
+    alias_method :to_hash, :to_h
   end
 end

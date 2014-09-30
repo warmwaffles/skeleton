@@ -9,9 +9,9 @@ module Skeleton
       @params[p] = value
     end
 
-    def to_hash
+    def to_h
       @params
     end
-    alias_method :to_h, :to_hash
+    alias_method :to_hash, :to_h
   end
 end

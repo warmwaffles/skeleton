@@ -3,6 +3,8 @@ require 'skeleton/link'
 
 module Skeleton
   class Builder
+    attr_accessor :actions
+
     def initialize
       @actions = Hash.new
       @links = Hash.new
@@ -21,5 +23,19 @@ module Skeleton
 
       @links.store(args[:rel], Link.new(args))
     end
+
+    def to_h
+      hash = {
+        links: []
+      }
+      @actions.each do |verb, action|
+        hash.store(verb.to_s.upcase, action.to_h)
+      end
+      @links.each do |rel, link|
+        hash['links'] = link.to_h
+      end
+      hash
+    end
+    alias_method :to_hash, :to_h
   end
 end

@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'skeleton'
 
 describe 'Full integration test' do
-  it 'works' do
+  it 'when describing collection resource' do
     skeleton = Skeleton.build do |config|
       config.define(:get, also: :head) do |action|
         action.description = 'Display a list of resources'
@@ -31,5 +31,8 @@ describe 'Full integration test' do
       end
       config.link(name: 'Documentation', rel: 'docs', href: 'https://docs.example.org/resources')
     end
+
+    refute_nil(skeleton.actions['get'])
+    refute_nil(skeleton.actions['head'])
   end
 end
