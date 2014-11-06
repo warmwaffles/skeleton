@@ -9,12 +9,16 @@ module Skeleton
 
       module ClassMethods
         def define_api_path(resource, &block)
-          Skeleton.config.structure.path(resource, &block)
+          Skeleton.config.path(resource, &block)
         end
 
         def define_global_parameter(location, name, &block)
-          Skeleton.config.structure.parameter(location, name, &block)
+          Skeleton.config.parameter(location, name, &block)
         end
+      end
+
+      def get_api_path(resource)
+        Skeleton.config.path(resource)
       end
     end
   end

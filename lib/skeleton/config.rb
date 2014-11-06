@@ -27,6 +27,10 @@ module Skeleton
       structure.path(resource, &block)
     end
 
+    def parameter(location, name, &block)
+      structure.parameter(location, name, &block)
+    end
+
     def to_swagger_json
       Skeleton::Serializers::Swagger.new(structure: structure).to_json
     end

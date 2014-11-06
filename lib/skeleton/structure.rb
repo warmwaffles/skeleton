@@ -29,10 +29,20 @@ module Skeleton
       @security_definitions = args[:security_definitions] || Hash.new
     end
 
+    # Define or get a path. If a block is provided, it will define a new path
+    # object. If no block is provided, the current block will be returned
+    #
+    # @param resource [String] the api path
+    #
+    # @return [Skeleton::Path]
     def path(resource, &block)
-      path_object = Skeleton::Path.new
-      yield(path_object) if block
-      @paths[resource] = path_object
+      if block
+        path_object = Skeleton::Path.new
+        yield(path_object)
+        @paths[resource] = path_object
+      else
+        @paths[resource]
+      end
     end
 
     def parameter(location, name, &block)
