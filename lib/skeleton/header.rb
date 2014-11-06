@@ -1,11 +1,16 @@
+require 'skeleton/attributes'
+
 module Skeleton
   class Header
+    extend Skeleton::Attributes
+
     attr_accessor :type, :format, :title, :description, :default, :multiple_of,
                   :maximum, :exclusive_maximum, :minimum, :exclusive_minimum,
                   :max_length, :min_length, :pattern, :max_items, :min_items,
                   :unique_items, :max_properties, :min_properties
 
     attr_writer :enum
+    attr_presence :exclusive_maximum, :exclusive_minimum, :unique_items
 
     def initialize(args={})
       args.each do |k, v|
@@ -16,18 +21,6 @@ module Skeleton
 
     def enum
       @enum ||= []
-    end
-
-    def exclusive_maximum?
-      !!@exclusive_maximum
-    end
-
-    def exclusive_minimum?
-      !!@exclusive_minimum
-    end
-
-    def unique_items?
-      !!@unique_items
     end
 
     def enum?

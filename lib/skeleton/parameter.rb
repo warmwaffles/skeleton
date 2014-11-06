@@ -1,5 +1,9 @@
+require 'skeleton/attributes'
+
 module Skeleton
   class Parameter
+    extend Skeleton::Attributes
+
     attr_accessor :name, :location, :description, :required, :schema, :type,
                   :format, :items, :collection_format, :default, :maximum,
                   :exclusive_maximum, :minimum, :exclusive_minimum, :max_length,
@@ -7,6 +11,11 @@ module Skeleton
                   :max_items, :pattern
 
     attr_writer :enum
+    attr_presence :pattern, :multiple_of, :unique_items, :max_items, :min_items,
+                  :min_length, :max_length, :minimum, :maximum, :default,
+                  :collection_format, :items, :format, :type, :schema, :required,
+                  :description, :location, :name, :exclusive_maximum,
+                  :exclusive_minimum, :unique_items
 
     def initialize(args={})
       args.each do |k, v|
@@ -19,96 +28,8 @@ module Skeleton
       @enum ||= []
     end
 
-    def pattern?
-      !!@pattern
-    end
-
-    def multiple_of?
-      !!@multiple_of
-    end
-
     def enum?
       !enum.empty?
-    end
-
-    def unique_items?
-      !!@unique_items
-    end
-
-    def max_items?
-      !!@max_items
-    end
-
-    def min_items?
-      !!@min_items
-    end
-
-    def min_length?
-      !!@min_length
-    end
-
-    def max_length?
-      !!@max_length
-    end
-
-    def minimum?
-      !!@minimum
-    end
-
-    def maximum?
-      !!@maximum
-    end
-
-    def default?
-      !!@default
-    end
-
-    def collection_format?
-      !!@collection_format
-    end
-
-    def items?
-      !!@items
-    end
-
-    def format?
-      !!@format
-    end
-
-    def type?
-      !!@type
-    end
-
-    def schema?
-      !!@schema
-    end
-
-    def required?
-      !!@required
-    end
-
-    def description?
-      !!@description
-    end
-
-    def location?
-      !!@location
-    end
-
-    def name?
-      !!@name
-    end
-
-    def exclusive_maximum?
-      !!@exclusive_maximum
-    end
-
-    def exclusive_minimum?
-      !!@exclusive_minimum
-    end
-
-    def unique_items?
-      !!@unique_items
     end
 
     def array?

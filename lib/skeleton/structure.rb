@@ -1,12 +1,16 @@
 require 'skeleton/path'
 require 'skeleton/info'
 require 'skeleton/parameter'
+require 'skeleton/attributes'
 
 module Skeleton
   class Structure
+    extend Skeleton::Attributes
+
     attr_accessor :paths, :consumes, :produces, :schemes, :host, :base_path,
                   :info, :definitions, :parameters, :security_definitions, :tags,
                   :external_docs
+    attr_presence :info
 
     def initialize(args={})
       @paths       = args[:paths] || Hash.new
@@ -35,10 +39,6 @@ module Skeleton
       param = Skeleton::Parameter.new({name: name})
       yield(param) if block
       @parameters[name] = param
-    end
-
-    def info?
-      !!@info
     end
   end
 end

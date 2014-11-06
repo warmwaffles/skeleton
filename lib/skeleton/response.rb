@@ -1,6 +1,11 @@
+require 'skeleton/attributes'
+
 module Skeleton
   class Response
+    extend Skeleton::Attributes
+
     attr_accessor :description, :schema, :headers, :examples
+    attr_presence :descriptions, :schema, :headers, :examples
 
     def initialize(args={})
       @description = args[:description]
@@ -20,22 +25,6 @@ module Skeleton
       end
 
       @examples = args[:examples]
-    end
-
-    def description?
-      !!@description
-    end
-
-    def schema?
-      !!@schema
-    end
-
-    def headers?
-      !!@headers
-    end
-
-    def examples?
-      !!@examples
     end
   end
 end

@@ -1,11 +1,15 @@
 require 'skeleton/parameter'
 require 'skeleton/response'
+require 'skeleton/attributes'
 
 module Skeleton
   class Operation
+    extend Skeleton::Attributes
+
     attr_accessor :tags, :summary, :description, :external_docs, :operation_id,
                   :consumes, :produces, :parameters, :responses, :schemes,
                   :deprecated, :security
+    attr_presence :summary, :description, :external_docs, :operation_id, :deprecated
 
     def initialize(args={})
       @tags          = Array(args[:tags])
@@ -30,22 +34,6 @@ module Skeleton
       !@tags.empty?
     end
 
-    def summary?
-      !!@summary
-    end
-
-    def description?
-      !!@description
-    end
-
-    def external_docs?
-      !!@externa_docs
-    end
-
-    def operation_id?
-      !!@operation_id
-    end
-
     def consumes?
       !@consumes.empty?
     end
@@ -66,10 +54,6 @@ module Skeleton
       !@schemes.empty?
     end
 
-    def deprecated?
-      !!@deprecated
-    end
-
     def security?
       !@security.empty?
     end
@@ -82,10 +66,6 @@ module Skeleton
       param = Parameter.new(location: location, name: name)
       yield(param) if block
       @parameters << param
-    end
-
-    def deprecated?
-      !!@deprecated
     end
   end
 end
