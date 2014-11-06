@@ -1,89 +1,112 @@
 # Skeleton
 
-Skeleton is a tool to help people construct `OPTIONS` api responses. This
-library is simply a data structure with no ties to any single framework.
+Was born from the desire for api documentation that can live along side actively
+running code.
 
 ## Example
 
 ```ruby
-require 'skeleton'
+# You would put this somewhere such as config/initializers/skeleton.rb
+Skeleton.configure do |config|
+  config.define do |structure|
+    structure.host = 'api.example.com'
+    structure.base_path = '/foo'
 
-skeleton = Skeleton.build do |config|
-  config.define(:get, also: :head) do |action|
-    action.description = 'Display a list of resources'
-
-    action.param('limit') do |p|
-      p.type = 'integer'
-      p.description = 'The number of items desired'
-      p.required = false
-      p.restriction('Minimum value is 0')
-      p.restriction('Maximum value is 9000')
-    end
-
-    action.param('offset') do |p|
-      p.type = 'integer'
-      p.description = 'The offset within the collection'
-      p.required = false
-      p.restriction('Minimum value is 0')
-    end
-
-    action.example do |e|
-      e.param('limit', 10),
-      e.param('offset', 0)
-    end
-
-    action.link(name: 'Self', rel: 'self', href: 'https://api.example.org/resources')
+    structure.schemes = %w(https)
+    structure.consumes = %(application/json)
+    structure.produces = %(application/json)
   end
 
-  config.link(name: 'Documentation', rel: 'docs', href: 'https://docs.example.org/resources')
-end
+  config.info do |info|
+    info.version = '1.0.6'
+    info.title = 'An Example API'
+    info.description = 'An api to interact with data'
+    info.terms_of_service = 'https://api.example.com/terms/'
+  end
 
-skeleton.to_h
+  config.contact do |contact|
+    contact.name = 'WarmWaffles'
+    contact.email = 'warmwaffles@gmail.com'
+    contact.url = 'https://github.com/warmwaffles/skeleton'
+  end
+
+  config.license do |license|
+    license.name = 'MIT'
+  end
+end
 ```
 
-Example `Skeleton::Builder#to_h` call
+Inside of your rails controller you would do the following
 
 ```ruby
-{
-  "links"=>[],
-  "GET"=>{
-    "description"=>"Display a list of resources",
-    "parameters"=>{
-      "limit"=>{
-        "type"=>"integer",
-        "description"=>"The number of items desired",
-        "required"=>false,
-        "allowed"=>[],
-        "restrictions"=>[
-          "Minimum value is 0",
-          "Maximum value is 9000"
-        ]
-      },
-      "offset"=>{
-        "type"=>"integer",
-        "description"=>"The offset within the collection",
-        "required"=>false,
-        "allowed"=>[],
-        "restrictions"=>[
-          "Minimum value is 0"
-        ]
-      }
-    },
-    "links"=>[
-      {
-        "name"=>"Self",
-        "rel"=>"self",
-        "href"=>"https://api.example.org/resources"
-      }
-    ],
-    "examples"=>[
-      {
-        "limit"=>10,
-        "offset"=>0
-      }
-    ]
-  }
-}
+class ApplicationController < ActionController::Base
+  include Skeleton::Helpers::ControllerHelpers
+end
+```
+
+Inside a controller that you wish to document do the following
+
+```ruby
+class AccountsController < ApplicationController
+  define_api_path('/accounts') do |path|
+    path.get do |operation|
+      operation.tag('account')
+      operation.description = 'List all of the accounts available to you'
+
+      operation.parameter(:query, 'limit') do |p|
+        p.description = 'maximum number of results to return'
+        p.type = 'integer'
+        p.format = 'int32'
+        p.required = false
+      end
+      operation.parameter(:query, 'offset') do |p|
+        p.description = 'offset within the results returned'
+        p.type = 'integer'
+        p.format = 'int32'
+        p.required = false
+      end
+    end
+  end
+
+  define_api_path('/accounts/{account_id}') do |path|
+    path.get do |operation|
+      operation.tag('account')
+      operation.description = 'Get an account'
+      operation.parameter(:query, 'account_id') do |p|
+        p.description = 'The account id'
+        p.type = 'string'
+        p.format = 'uuid'
+        p.required = true
+      end
+    end
+
+    path.options do |operation|
+      operation.tag('account')
+      operation.description = 'Show available options for the account'
+      operation.parameter(:query, 'account_id') do |p|
+        p.description = 'The account id'
+        p.type = 'string'
+        p.format = 'uuid'
+        p.required = true
+      end
+    end
+  end
+end
+```
+
+If you want to dump the documentation to swagger you can simply do the
+following:
+
+```ruby
+class DocumentationController < ApplicationController
+  def swagger
+    respond_to do |format|
+      format.json do
+        render(json: Skeleton.config.to_swagger_json, status: 200)
+      end
+    end
+  end
+end
 ```
 
 ## Testing
