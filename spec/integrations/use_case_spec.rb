@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 require 'skeleton'
-require 'skeleton/serializers/swagger'
-require 'pp'
 
 describe 'A simple use case' do
   describe 'validating the first case' do
@@ -125,6 +123,9 @@ describe 'A simple use case' do
           end
         end
       end
+      @structure.to_json
+      @structure.to_swagger_json
     end
+
   end
 end

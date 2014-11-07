@@ -1,5 +1,4 @@
 require 'skeleton/structure'
-require 'skeleton/serializers/swagger'
 
 module Skeleton
   class Config
