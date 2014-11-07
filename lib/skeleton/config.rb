@@ -32,7 +32,7 @@ module Skeleton
     end
 
     def to_swagger_json
-      Skeleton::Serializers::Swagger.new(structure: structure).to_json
+      structure.to_swagger_json
     end
   end
 end

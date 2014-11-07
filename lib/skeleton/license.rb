@@ -1,15 +1,16 @@
-require 'skeleton/attributes'
+require 'skeleton/model'
 
 module Skeleton
-  class License
-    extend Skeleton::Attributes
-
+  class License < Model
     attr_accessor :name, :url
     attr_presence :name, :url
 
-    def initialize(args={})
-      @name = args[:name]
-      @url  = args[:url]
+    def to_h
+      hash = {}
+      hash[:name] = name if name?
+      hash[:url] = url if url?
+      hash
     end
+    alias_method :to_swagger_hash, :to_h
   end
 end

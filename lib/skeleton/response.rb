@@ -1,30 +1,59 @@
-require 'skeleton/attributes'
+require 'skeleton/model'
+require 'skeleton/headers'
+require 'skeleton/schema'
 
 module Skeleton
-  class Response
-    extend Skeleton::Attributes
+  class Response < Model
+    attr_accessor :description
+    attr_reader :headers, :schema
+    attr_presence :descriptions, :examples
+    attr_not_empty :headers, :schema
 
-    attr_accessor :description, :schema, :headers, :examples
-    attr_presence :descriptions, :schema, :headers, :examples
-
-    def initialize(args={})
-      @description = args[:description]
-
-      case args[:schema]
+    def headers=(value)
+      case value
       when Hash
-        @schema = Skeleton::Schema.new(args[:schema])
+        @headers = Skeleton::Headers.new(value)
       else
-        @schema = args[:schema]
+        @headers = value
       end
+    end
 
-      case args[:headers]
+    def schema=(value)
+      case value
       when Hash
-        @headers = Skeleton::Headers.new(args[:headers])
+        @schema = Skeleton::Schema.new(value)
       else
-        @headers = args[:headers]
+        @schema = value
       end
+    end
 
-      @examples = args[:examples]
+    def examples=(value)
+      case value
+      when Hash
+        @examples = Skeleton::Example.new(value)
+      else
+        @examples = value
+      end
+    end
+
+    def to_h
+      hash = {}
+      hash[:description] = description   if description?
+      hash[:examples]    = examples.to_h if examples?
+      hash[:headers]     = headers.to_h  if headers?
+      hash[:schema]      = schema.to_h   if schema?
+      hash[:examples]    = examples.to_h if examples?
+      hash
+    end
+
+    def to_swagger_hash
+      hash = {}
+      hash[:description] = description              if description?
+      hash[:examples]    = examples.to_swagger_hash if examples?
+      hash[:headers]     = headers.to_swagger_hash  if headers?
+      hash[:schema]      = schema.to_swagger_hash   if schema?
+      hash[:examples]    = examples.to_swagger_hash if examples?
+      hash
     end
   end
 end
