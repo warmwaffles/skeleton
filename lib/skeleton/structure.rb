@@ -147,6 +147,7 @@ module Skeleton
 
     def to_swagger_hash
       hash = {}
+      hash[:version] = '2.0'
       hash[:info] = info.to_swagger_hash if info?
       hash[:host] = host if host?
       hash[:basePath] = base_path if base_path?
