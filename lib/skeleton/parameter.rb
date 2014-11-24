@@ -81,7 +81,7 @@ module Skeleton
     def to_swagger_hash
       hash = {}
       hash[:name]             = name              if name?
-      hash[:location]         = location          if location?
+      hash[:in]               = location          if location?
       hash[:description]      = description       if description?
       hash[:required]         = required          if required?
 
