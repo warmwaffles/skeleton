@@ -12,3 +12,6 @@ module Minitest
     end
   end
 end
+
+require_relative 'support/kissmetrics/core_api'
+require_relative 'support/fixtures'

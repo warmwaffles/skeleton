@@ -1,10 +1,10 @@
 require 'skeleton/attributes'
 module Skeleton
-  class Tag
+  class Scope
     extend Skeleton::Attributes
 
-    attr_accessor :name, :description, :external_docs
-    attr_presence :name, :description, :external_docs
+    attr_accessor :name, :description
+    attr_presence :name, :description
 
     def initialize(args={})
       args.each do |k, v|
@@ -14,6 +14,5 @@ module Skeleton
     end
 
     alias_method :describe, :description=
-    alias_method :document, :external_docs=
   end
 end
