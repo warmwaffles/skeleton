@@ -161,6 +161,7 @@ module Skeleton
         response.headers.each do |field, header|
           hash[:headers][field] = schema_to_h(header)
         end
+        hash
       end
 
       def operation_to_h(operation)

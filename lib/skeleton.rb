@@ -10,3 +10,4 @@ module Skeleton
 end
 
 require 'skeleton/serializers/swagger'
+require 'skeleton/serializers/options'

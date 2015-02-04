@@ -5,6 +5,8 @@ require 'minitest/autorun'
 require 'minitest/spec'
 require 'minitest/pride'
 
+require 'webmock/minitest'
+
 module Minitest
   class Spec
     class << self

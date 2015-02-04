@@ -7,6 +7,14 @@ require 'skeleton/serializers/swagger'
 describe 'Validate complex schemas' do
   context 'KISSmetrics Core API' do
     it 'conforms to the Swagger v2.0 Schema' do
+      # JSON Validator will reach out and grab this draft. This is to avoid
+      # the intermittent errors that occur
+      stub_request(:get, "http://json-schema.org/draft-04/schema")
+        .to_return({
+          status: 200,
+          body: Fixtures.read('json-schema-draft-04.json')
+        })
+
       structure = KISSmetrics::CoreAPI.structure
       hash = Skeleton::Serializers::Swagger.new(structure).to_h
       schema = MultiJson.load(Fixtures.read('schema.json'))

@@ -1,3 +1,5 @@
+require 'multi_json'
+
 module Skeleton
   module Serializers
     class Options
@@ -5,7 +7,9 @@ module Skeleton
 
       def initialize(structure, options={})
         @structure = structure
-        @paths = options[:paths]
+
+        @path        = options[:path] || raise(ArgumentError, ':path is required')
+        @definitions = options[:definitions] || '#/definitions'
       end
 
       def to_json(*)
@@ -13,7 +17,10 @@ module Skeleton
       end
 
       def to_h
-        hash = {}
+        hash = {
+          consumes: structure.consumes.map(&:to_s),
+          produces: structure.produces.map(&:to_s)
+        }
 
         if structure.parameters?
           hash[:parameters] = {}
@@ -30,7 +37,7 @@ module Skeleton
         end
 
         if structure.secure?
-          hash[:securityDefinitions] = {},
+          hash[:security_definitions] = {},
           hash[:security] = []
         end
 
@@ -39,38 +46,62 @@ module Skeleton
             name: name
           }
           sub[:description] = tag.description if tag.description?
-          sub[:externalDocs] = tag.external_docs if tag.external_docs?
+          sub[:external_docs] = tag.external_docs if tag.external_docs?
           sub
         end
 
-        if structure.external_docs
-          hash[:externalDocs] = structure.external_docs
+        path = structure.paths.fetch(@path)
+        hash[:operations] ||= {}
+        path.operations.each do |verb, operation|
+          hash[:operations][verb] = operation_to_h(operation)
         end
 
-        hash[:paths] = {}
-        structure.paths.each do |resource, path|
-          hash[:paths][resource] = {}
-
-          path.operations.each do |verb, operation|
-            hash[:paths][resource][verb] = operation_to_h(operation)
-          end
-        end
-
+        # Need to loop through to ensure that we gather all of the requirements
+        # and add them to the definitions map
         hash[:definitions] = {}
-        structure.models.each do |name, model|
-          hash[:definitions][name] = schema_to_h(model)
+        required_definitions.each do |name|
+          hash[:definitions][name] = schema_to_h(structure.models[name])
         end
-
-        hash[:consumes] = structure.consumes.map(&:to_s)
-        hash[:produces] = structure.produces.map(&:to_s)
 
         hash
       end
 
-      private
+      def required_definitions
+        @required_definitions ||= Set.new
+      end
+
+      def require_definition(schema)
+        if required_definitions.include?(schema.ref)
+          return false
+        else
+          required_definitions.add(schema.ref)
+        end
+
+        required_definitions.merge(references_for(schema))
+      end
+
+      def references_for(schema)
+        refs = Set.new
+
+        if schema.ref?
+          refs.add(schema.ref)
+          referenced = structure.models[schema.ref]
+          refs.merge references_for(referenced)
+        end
+
+        schema.properties.each do |name, property|
+          refs.merge(references_for(property))
+        end
+
+        if schema.items? && schema.items.ref?
+          refs.add(schema.items.ref)
+        end
+
+        refs
+      end
 
       def definition_ref(name)
-        '#/definitions/%s' % [name]
+        '%s/%s' % [@definitions, name]
       end
 
       def parameter_to_h(parameter)
@@ -99,22 +130,27 @@ module Skeleton
 
       def schema_to_h(schema)
         hash = {}
-        hash['$ref']            = definition_ref(schema.ref) if schema.ref?
-        hash[:description]      = schema.description         if schema.description?
-        hash[:default]          = schema.default             if schema.default?
-        hash[:maximum]          = schema.maximum             if schema.maximum?
-        hash[:exclusiveMaximum] = !!schema.exclusive_maximum if schema.exclusive_maximum?
-        hash[:minimum]          = schema.minimum             if schema.minimum?
-        hash[:exclusiveMinimum] = !!schema.exclusive_minimum if schema.exclusive_minimum?
-        hash[:maxLength]        = schema.max_length          if schema.max_length?
-        hash[:minLength]        = schema.min_length          if schema.min_length?
-        hash[:pattern]          = schema.pattern             if schema.pattern?
-        hash[:maxItems]         = schema.max_items           if schema.max_items?
-        hash[:minItems]         = schema.min_items           if schema.min_items?
-        hash[:uniqueItems]      = !!schema.unique_items      if schema.unique_items?
-        hash[:enum]             = schema.enum.map(&:to_s)    unless schema.enum.empty?
-        hash[:multipleOf]       = schema.multiple_of         if schema.multiple_of?
-        hash[:type]             = schema.type                if schema.type
+
+        if schema.ref?
+          hash['$ref'] = definition_ref(schema.ref)
+          require_definition(schema)
+        end
+
+        hash[:description]       = schema.description         if schema.description?
+        hash[:default]           = schema.default             if schema.default?
+        hash[:maximum]           = schema.maximum             if schema.maximum?
+        hash[:exclusive_maximum] = !!schema.exclusive_maximum if schema.exclusive_maximum?
+        hash[:minimum]           = schema.minimum             if schema.minimum?
+        hash[:exclusive_minimum] = !!schema.exclusive_minimum if schema.exclusive_minimum?
+        hash[:max_length]        = schema.max_length          if schema.max_length?
+        hash[:min_length]        = schema.min_length          if schema.min_length?
+        hash[:pattern]           = schema.pattern             if schema.pattern?
+        hash[:max_items]         = schema.max_items           if schema.max_items?
+        hash[:min_items]         = schema.min_items           if schema.min_items?
+        hash[:unique_items]      = !!schema.unique_items      if schema.unique_items?
+        hash[:enum]              = schema.enum.map(&:to_s)    unless schema.enum.empty?
+        hash[:multiple_of]       = schema.multiple_of         if schema.multiple_of?
+        hash[:type]              = schema.type                if schema.type
 
         if schema.properties?
           hash[:properties] = {}
@@ -141,6 +177,7 @@ module Skeleton
         response.headers.each do |field, header|
           hash[:headers][field] = schema_to_h(header)
         end
+        hash
       end
 
       def operation_to_h(operation)
@@ -151,7 +188,7 @@ module Skeleton
           responses: {}
         }
 
-        hash[:operationId] = operation.id if operation.id?
+        hash[:operation_id] = operation.id if operation.id?
         hash[:consumes] = operation.consumes if operation.consumes?
         hash[:produces] = operation.produces if operation.produces?
 
@@ -167,6 +204,7 @@ module Skeleton
 
         hash
       end
+
     end
   end
 end

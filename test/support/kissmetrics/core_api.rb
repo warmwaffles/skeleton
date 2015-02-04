@@ -173,13 +173,13 @@ module KISSmetrics
 
           response(200, default: true) do
             describe('Product list')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'Product')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -196,12 +196,12 @@ module KISSmetrics
 
           response(200, default: true) do
             describe('Product list')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
         end
 
@@ -216,19 +216,19 @@ module KISSmetrics
 
           response(201) do
             describe('Product created')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'Product')
           end
 
           response(400) do
             describe('Client error')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -246,19 +246,19 @@ module KISSmetrics
           response(200, default: true) do
             describe('Product action list')
             header('Allow', type: 'array', items: { type: 'string' }, collection_format: 'csv')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'OptionsResponse')
           end
 
           response(400) do
             describe('Client error')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -278,19 +278,19 @@ module KISSmetrics
 
           response(200) do
             describe('Product found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'Product')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(404) do
             describe('Not Found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -306,17 +306,17 @@ module KISSmetrics
 
           response(200) do
             describe('Product found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
 
           response(404) do
             describe('Not Found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
         end
 
@@ -332,19 +332,19 @@ module KISSmetrics
           response(200, default: true) do
             describe('Product actions')
             header('Allow', type: 'array', items: { type: 'string' }, collection_format: 'csv')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'OptionsResponse')
           end
 
           response(400) do
             describe('Client error')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -365,19 +365,19 @@ module KISSmetrics
 
           response(200) do
             describe('Product found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'WizardRules')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(404) do
             describe('Product not found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -394,17 +394,17 @@ module KISSmetrics
 
           response(200, default: true) do
             describe('Product found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
 
           response(404) do
             describe('Product not found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
         end
 
@@ -421,19 +421,19 @@ module KISSmetrics
           response(200, default: true) do
             describe('Product actions')
             header('Allow', type: 'array', items: { type: 'string' }, collection_format: 'csv')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'OptionsResponse')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(404) do
             describe('Product not found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -449,25 +449,25 @@ module KISSmetrics
 
           response(201) do
             describe('Rule created')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'WizardRule')
           end
 
           response(400) do
             describe('Client error')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(404) do
             describe('Product not found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -483,25 +483,25 @@ module KISSmetrics
 
           response(200) do
             describe('Rule updated')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'WizardRule')
           end
 
           response(400) do
             describe('Client error')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(404) do
             describe('Product not found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
@@ -519,18 +519,18 @@ module KISSmetrics
 
           response(204) do
             describe('Rule deleted')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
           end
 
           response(403) do
             describe('Unauthorized')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
 
           response(404) do
             describe('Product not found')
-            header('Links', type: 'string', description: 'The list of links for the resource')
+            header('Link', type: 'string', description: 'The list of links for the resource')
             schema(ref: 'ErrorResponse')
           end
         end
