@@ -78,15 +78,15 @@ module Skeleton
     end
 
     def scheme(*types)
-      types.each { |t| schemes.add(t.to_s) }
+      types.flatten.each { |t| schemes.add(t.to_s) }
     end
 
     def consume(*types)
-      types.each { |t| consumes.add(t.to_s) }
+      types.flatten.each { |t| consumes.add(t.to_s) }
     end
 
     def produce(*types)
-      types.each { |t| produces.add(t.to_s) }
+      types.flatten.each { |t| produces.add(t.to_s) }
     end
 
     def parameters?
