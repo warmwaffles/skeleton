@@ -119,6 +119,8 @@ module Skeleton
 
       def schema_to_h(schema)
         hash = {}
+        return hash if schema.nil?
+
         hash['$ref']            = definition_ref(schema.ref) if schema.ref?
         hash[:description]      = schema.description         if schema.description?
         hash[:default]          = schema.default             if schema.default?

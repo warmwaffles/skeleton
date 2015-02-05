@@ -1,4 +1,5 @@
 require 'multi_json'
+require 'skeleton/error'
 
 module Skeleton
   module Serializers
@@ -8,7 +9,7 @@ module Skeleton
       def initialize(structure, options={})
         @structure = structure
 
-        @path        = options[:path] || raise(ArgumentError, ':path is required')
+        @path        = options[:path] || raise(Skeleton::Error, ':path is required')
         @definitions = options[:definitions] || '#/definitions'
       end
 
@@ -50,7 +51,7 @@ module Skeleton
           sub
         end
 
-        path = structure.paths.fetch(@path)
+        path = structure.paths.fetch(@path) { raise(Skeleton::Error, "path '#{@path}' not found in structure") }
         hash[:operations] ||= {}
         path.operations.each do |verb, operation|
           hash[:operations][verb] = operation_to_h(operation)
@@ -65,6 +66,8 @@ module Skeleton
 
         hash
       end
+
+      private
 
       def required_definitions
         @required_definitions ||= Set.new
@@ -130,6 +133,8 @@ module Skeleton
 
       def schema_to_h(schema)
         hash = {}
+
+        return hash if schema.nil?
 
         if schema.ref?
           hash['$ref'] = definition_ref(schema.ref)
