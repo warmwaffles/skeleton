@@ -15,6 +15,20 @@ module Skeleton
     attr_accessor :terms, :host, :base_path, :title, :version, :description,
       :external_docs
 
+    alias_method :describe, :description=
+
+    def configure(&block)
+      return self unless block
+
+      if block.arity == 0
+        self.instance_eval(&block)
+      else
+        yield(self)
+      end
+
+      self
+    end
+
     def schemes
       @schemes ||= Set.new
     end
