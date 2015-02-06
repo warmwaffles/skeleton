@@ -2,7 +2,7 @@ require 'skeleton/schema'
 
 module Skeleton
   class Model < Schema
-    attr_reader :description, :descriptor
+    attr_reader :description, :descriptor, :name
 
     def describe(value)
       @description = value
@@ -12,16 +12,16 @@ module Skeleton
       @descriptor = value
     end
 
-    def required(name, options={})
-      property(name, { required: true }.merge(options))
+    def required(field, options={})
+      property(field, { required: true }.merge(options))
     end
 
-    def optional(name, options={})
-      property(name, { required: false }.merge(options))
+    def optional(field, options={})
+      property(field, { required: false }.merge(options))
     end
 
-    def property(name, options={})
-      properties[name] = Skeleton::Schema.new(options)
+    def property(field, options={})
+      properties[field] = Skeleton::Schema.new(options)
     end
   end
 end

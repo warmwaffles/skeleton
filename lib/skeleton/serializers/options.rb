@@ -1,5 +1,6 @@
 require 'multi_json'
 require 'skeleton/error'
+require 'skeleton/graph'
 
 module Skeleton
   module Serializers
@@ -9,8 +10,9 @@ module Skeleton
       def initialize(structure, options={})
         @structure = structure
 
-        @path        = options[:path] || raise(Skeleton::Error, ':path is required')
-        @definitions = options[:definitions] || '#/definitions'
+        @path = options[:path] || raise(Skeleton::Error, ':path is required')
+        @definition_path = options[:definitions] || '#/definitions'
+
       end
 
       def to_json(*)
@@ -18,6 +20,11 @@ module Skeleton
       end
 
       def to_h
+        graph = Skeleton::Graph.new
+        structure.models.each do |name, model|
+          graph.register(name, dependencies_for(model))
+        end
+
         hash = {
           consumes: structure.consumes.map(&:to_s),
           produces: structure.produces.map(&:to_s)
@@ -57,54 +64,44 @@ module Skeleton
           hash[:operations][verb] = operation_to_h(operation)
         end
 
-        # Need to loop through to ensure that we gather all of the requirements
-        # and add them to the definitions map
-        hash[:definitions] = {}
-        required_definitions.each do |name|
-          hash[:definitions][name] = schema_to_h(structure.models[name])
+        hash[:definitions] ||= {}
+
+        dependencies.to_a.each do |dep|
+          graph.each_dependent_for(dep) do |name|
+            hash[:definitions][name] = schema_to_h(structure.models[name])
+          end
         end
 
         hash
       end
 
-      private
-
-      def required_definitions
-        @required_definitions ||= Set.new
+      def dependencies
+        @definitions ||= Set.new
       end
 
-      def require_definition(schema)
-        if required_definitions.include?(schema.ref)
-          return false
-        else
-          required_definitions.add(schema.ref)
-        end
-
-        required_definitions.merge(references_for(schema))
+      def register_dependent(name)
+        dependencies.add(name)
       end
 
-      def references_for(schema)
-        refs = Set.new
+      def dependencies_for(schema, set=Set.new)
+        return set if schema.nil?
 
         if schema.ref?
-          refs.add(schema.ref)
-          referenced = structure.models[schema.ref]
-          refs.merge references_for(referenced)
+          return set if set.include?(schema.ref)
+          set.add(schema.ref)
         end
 
-        schema.properties.each do |name, property|
-          refs.merge(references_for(property))
+        schema.properties.each do |field, property|
+          set.merge(dependencies_for(property))
         end
 
-        if schema.items? && schema.items.ref?
-          refs.add(schema.items.ref)
-        end
+        set.merge(dependencies_for(schema.items)) if schema.items?
 
-        refs
+        set.to_a
       end
 
-      def definition_ref(name)
-        '%s/%s' % [@definitions, name]
+      def definition_reference(name)
+        '%s/%s' % [@definition_path, name]
       end
 
       def parameter_to_h(parameter)
@@ -113,6 +110,7 @@ module Skeleton
           in: parameter.location,
           required: parameter.required?
         }.merge(schema_to_h(parameter))
+
         hash[:schema] = schema_to_h(parameter.schema) if parameter.schema?
         hash
       end
@@ -137,8 +135,9 @@ module Skeleton
         return hash if schema.nil?
 
         if schema.ref?
-          hash['$ref'] = definition_ref(schema.ref)
-          require_definition(schema)
+          hash['$ref'] = definition_reference(schema.ref)
+          dependencies.merge(dependencies_for(schema))
+          dependencies.add(schema.ref)
         end
 
         hash[:description]       = schema.description         if schema.description?

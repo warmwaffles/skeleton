@@ -138,7 +138,7 @@ module Skeleton
     end
 
     def define_model(name, options={}, &block)
-      models[name] = Skeleton::Model.new
+      models[name] = Skeleton::Model.new(name: name)
       models[name].instance_eval(&block) if block
       models[name]
     end

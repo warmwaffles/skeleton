@@ -8,7 +8,21 @@ module Skeleton
       end
 
       def serializer
-        @serializer ||= Skeleton::Serializers::Options.new(structure, path: '/foos')
+        @serializer ||= Skeleton::Serializers::Options.new(structure, path: '/accounts')
+      end
+
+      def test_deeply_nested_dependencies
+        Factories::StructureFactory.configure_basic_structure(structure)
+        hash = serializer.to_h
+
+        refute_nil(hash[:definitions], 'Expected definitions to be present')
+        refute_nil(hash[:definitions]['Accounts'])
+        refute_nil(hash[:definitions]['AccountData'])
+        refute_nil(hash[:definitions]['Meta'])
+        refute_nil(hash[:definitions]['Error'])
+        refute_nil(hash[:definitions]['Link'])
+        refute_nil(hash[:definitions]['Contact'])
+        refute_nil(hash[:definitions]['ErrorResponse'])
       end
 
       def test_empty_structure
@@ -16,7 +30,7 @@ module Skeleton
       end
 
       def test_reference_non_existant_model
-        structure.define_path('/foos') do
+        structure.define_path('/accounts') do
           get do
             response(200) do
               schema(ref: 'Foo')
@@ -29,8 +43,9 @@ module Skeleton
 
         hash = serializer.to_h
 
-        refute_empty(hash[:definitions]['Foo'])
-        assert_empty(hash[:definitions]['Bar'])
+        refute_nil(hash[:definitions], 'Expected definitions to be present')
+        refute_nil(hash[:definitions]['Foo'], 'Expected Foo to be present')
+        assert_empty(hash[:definitions]['Bar'], 'Expected Bar to be empty')
       end
 
       def test_path_that_does_not_exist

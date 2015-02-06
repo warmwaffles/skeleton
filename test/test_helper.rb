@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'bundler'
-
+require 'pp'
 require 'minitest/autorun'
 require 'minitest/spec'
 require 'minitest/pride'
@@ -15,5 +15,6 @@ module Minitest
   end
 end
 
-require_relative 'support/kissmetrics/core_api'
 require_relative 'support/fixtures'
+require_relative 'support/kissmetrics/core_api'
+require_relative 'support/factories/structure_factory'
