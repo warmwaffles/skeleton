@@ -1,3 +1,3 @@
 module Skeleton
-  VERSION = '0.4.0-rc2'
+  VERSION = '0.4.1'
 end

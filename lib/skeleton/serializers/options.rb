@@ -192,6 +192,7 @@ module Skeleton
           responses: {}
         }
 
+        hash[:deprecated] = true if operation.deprecated?
         hash[:operation_id] = operation.id if operation.id?
         hash[:consumes] = operation.consumes if operation.consumes?
         hash[:produces] = operation.produces if operation.produces?

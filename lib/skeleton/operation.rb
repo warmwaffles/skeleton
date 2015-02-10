@@ -18,6 +18,14 @@ module Skeleton
     alias_method :describe, :description=
     alias_method :identify, :id=
 
+    def deprecate
+      @deprecated = true
+    end
+
+    def deprecated?
+      !!@deprecated
+    end
+
     def id?
       !!@id
     end
