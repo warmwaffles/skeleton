@@ -1,6 +1,6 @@
 require 'skeleton/schema'
 
 module Skeleton
-  class Header < Schema
+  class Property < Schema
   end
 end

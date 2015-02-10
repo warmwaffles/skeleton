@@ -1,59 +1,38 @@
-require 'skeleton/model'
-require 'skeleton/headers'
 require 'skeleton/schema'
+require 'skeleton/header'
 
 module Skeleton
-  class Response < Model
-    attr_accessor :description
-    attr_reader :headers, :schema
-    attr_presence :descriptions, :examples
-    attr_not_empty :headers, :schema
+  class Response < Schema
+    attr_accessor :summary, :description
 
-    def headers=(value)
-      case value
-      when Hash
-        @headers = Skeleton::Headers.new(value)
-      else
-        @headers = value
-      end
+    alias_method :summarize, :summary=
+    alias_method :describe, :description=
+
+    def headers
+      @headers ||= {}
     end
 
-    def schema=(value)
-      case value
-      when Hash
+    def no_body
+      @schema = nil
+    end
+
+    def schema?
+      !!@schema
+    end
+
+    def schema(value=nil, &block)
+      if block
+        @schema = Skeleton::Model.new
+        @schema.instance_eval(&block)
+      elsif value.is_a?(Hash)
         @schema = Skeleton::Schema.new(value)
-      else
-        @schema = value
       end
+
+      @schema
     end
 
-    def examples=(value)
-      case value
-      when Hash
-        @examples = Skeleton::Example.new(value)
-      else
-        @examples = value
-      end
-    end
-
-    def to_h
-      hash = {}
-      hash[:description] = description   if description?
-      hash[:examples]    = examples.to_h if examples?
-      hash[:headers]     = headers.to_h  if headers?
-      hash[:schema]      = schema.to_h   if schema?
-      hash[:examples]    = examples.to_h if examples?
-      hash
-    end
-
-    def to_swagger_hash
-      hash = {}
-      hash[:description] = description              if description?
-      hash[:examples]    = examples.to_swagger_hash if examples?
-      hash[:headers]     = headers.to_swagger_hash  if headers?
-      hash[:schema]      = schema.to_swagger_hash   if schema?
-      hash[:examples]    = examples.to_swagger_hash if examples?
-      hash
+    def header(field, options={})
+      headers[field] = Skeleton::Header.new(options)
     end
   end
 end

@@ -1,192 +1,146 @@
-require 'skeleton/model'
+require 'set'
+
 require 'skeleton/path'
-require 'skeleton/info'
+require 'skeleton/model'
+require 'skeleton/contact'
+require 'skeleton/license'
+require 'skeleton/tag'
+require 'skeleton/scope'
 require 'skeleton/parameter'
-require 'skeleton/responses'
-require 'skeleton/security_definitions'
+require 'skeleton/response'
+require 'skeleton/security_scheme'
 
 module Skeleton
-  class Structure < Model
-    attr_accessor :host, :base_path, :external_docs
-    attr_presence :info, :host, :base_path, :external_docs, :security
-    attr_not_empty :consumes, :responses, :produces, :schemes, :security, :tags,
-                   :definitions, :parameters, :paths, :security_definitions
+  class Structure
+    attr_accessor :terms, :host, :base_path, :title, :version, :description,
+      :external_docs
 
-    def responses=(value)
-      case value
-      when Hash
-        Skeleton::Responses.new(value)
+    alias_method :describe, :description=
+
+    def configure(&block)
+      return self unless block
+
+      if block.arity == 0
+        self.instance_eval(&block)
       else
-        @responses = value
+        yield(self)
       end
-    end
 
-    def responses
-      @responses ||= Skeleton::Responses.new
-    end
-
-    def consumes=(value)
-      @consumes = Array(value)
-    end
-
-    def consumes
-      @consumes ||= []
-    end
-
-    def produces=(value)
-      @produces = Array(value)
-    end
-
-    def produces
-      @produces ||= []
-    end
-
-    def schemes=(value)
-      @schemes = Array(value)
+      self
     end
 
     def schemes
-      @schemes ||= []
+      @schemes ||= Set.new
     end
 
-    def security=(value)
-      @security = Array(value)
+    def consumes
+      @consumes ||= Set.new
     end
 
-    def security
-      @security ||= []
+    def produces
+      @produces ||= Set.new
     end
 
-    def tags=(value)
-      @tags = Array(value)
+    def license
+      @license ||= Skeleton::License.new
     end
 
     def tags
-      @tags ||= []
+      @tags ||= {}
     end
 
-    def info
-      @info ||= Skeleton::Info.new
+    def contact
+      @contact ||= Skeleton::Contact.new
     end
 
-    def definitions
-      @definitions ||= {}
+    def responses
+      @responses ||= {}
     end
 
     def parameters
       @parameters ||= {}
     end
 
+    def scopes
+      @scopes ||= {}
+    end
+
+    def security
+      @security ||= {}
+    end
+
     def paths
       @paths ||= {}
     end
 
-    def security_definitions
-      @security_definitions ||= Skeleton::SecurityDefinitions.new
+    def models
+      @models ||= {}
     end
 
-    # Define or get a path. If a block is provided, it will define a new path
-    # object. If no block is provided, the current block will be returned
-    #
-    # @param resource [String] the api path
-    #
-    # @return [Skeleton::Path]
-    def path(resource, &block)
-      if block
-        path_object = Skeleton::Path.new
-        yield(path_object)
-        paths[resource] = path_object
-      else
-        paths[resource]
-      end
+    def scheme(*types)
+      types.flatten.each { |t| schemes.add(t.to_s) }
     end
 
-    def parameter(location, name, &block)
-      param = Skeleton::Parameter.new({name: name})
-      yield(param) if block
-      parameters[name] = param
+    def consume(*types)
+      types.flatten.each { |t| consumes.add(t.to_s) }
     end
 
-    def to_h
-      hash = {}
-      hash[:info] = info.to_h if info?
-      hash[:host] = host if host?
-      hash[:base_path] = base_path if base_path?
-      hash[:external_docs] = external_docs if external_docs?
-      hash[:schemes]  = schemes if schemes?
-      hash[:consumes] = consumes if consumes?
-      hash[:produces] = produces if produces?
-
-      if paths?
-        hash[:paths] = {}
-        paths.each do |resource, path|
-          hash[:paths][resource] = path.to_h
-        end
-      end
-
-      if parameters?
-        hash[:parameters] = {}
-        parameters.each do |name, parameter|
-          hash[:parameters][name] = parameter.to_h
-        end
-      end
-
-      hash[:responses] = responses.to_h if responses?
-
-      if security_definitions?
-        hash[:security_definitions] = security_definitions.to_h
-      end
-
-      if security?
-        hash[:security] = security.map(&:to_h)
-      end
-
-      hash[:tags] = tags.map(&:to_h) if tags?
-      hash
+    def produce(*types)
+      types.flatten.each { |t| produces.add(t.to_s) }
     end
 
-    def to_swagger_hash
-      hash = {}
-      hash[:swagger] = '2.0'
-      hash[:info] = info.to_swagger_hash if info?
-      hash[:host] = host if host?
-      hash[:basePath] = base_path if base_path?
-      hash[:externalDocs] = external_docs if external_docs?
-      hash[:schemes]  = schemes if schemes?
-      hash[:consumes] = consumes if consumes?
-      hash[:produces] = produces if produces?
+    def parameters?
+      !parameters.empty?
+    end
 
-      if paths?
-        hash[:paths] = {}
-        paths.each do |resource, path|
-          hash[:paths][resource] = path.to_swagger_hash
-        end
-      end
+    def responses?
+      !responses.empty?
+    end
 
-      if parameters?
-        hash[:parameters] = {}
-        parameters.each do |name, parameter|
-          hash[:parameters][name] = parameter.to_swagger_hash
-        end
-      end
+    def secure?
+      !security.empty?
+    end
 
-      if responses?
-        hash[:responses] = responses.to_swagger_hash
-      end
+    def define_response(name, &block)
+      responses[name] = Skeleton::Response.new
+      responses[name].instance_eval(&block) if block
+      responses[name]
+    end
 
-      if security_definitions?
-        hash[:securityDefinitions] = security_definitions.to_swagger_hash
-      end
+    def define_parameter(name, &block)
+      parameters[name] = Skeleton::Parameter.new
+      parameters[name].instance_eval(&block) if block
+      parameters[name]
+    end
 
-      if security?
-        hash[:security] = security.map(&:to_swagger_hash)
-      end
+    def define_scope(name, &block)
+      scopes[name] = Skeleton::Scope.new
+      scopes[name].instance_eval(&block) if block
+      scopes[name]
+    end
 
-      if tags?
-        hash[:tags] = tags.map(&:to_swagger_hash)
-      end
+    def define_security(name, &block)
+      security[name] = Skeleton::SecurityScheme.new(name: name)
+      security[name].instance_eval(&block) if block
+      security[name]
+    end
 
-      hash
+    def define_tag(name, &block)
+      tags[name] = Skeleton::Tag.new(name: name)
+      tags[name].instance_eval(&block) if block
+      tags[name]
+    end
+
+    def define_path(path, options={}, &block)
+      paths[path] = Skeleton::Path.new
+      paths[path].instance_eval(&block) if block
+      paths[path]
+    end
+
+    def define_model(name, options={}, &block)
+      models[name] = Skeleton::Model.new(name: name)
+      models[name].instance_eval(&block) if block
+      models[name]
     end
   end
 end

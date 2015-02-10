@@ -1,31 +1,27 @@
-require 'multi_json'
-require 'skeleton/attributes'
+require 'skeleton/schema'
 
 module Skeleton
-  class Model
-    extend Skeleton::Attributes
+  class Model < Schema
+    attr_reader :description, :descriptor, :name
 
-    def initialize(args={})
-      args.each do |k, v|
-        setter = "#{k}="
-        self.public_send(setter, v) if self.respond_to?(setter)
-      end
+    def describe(value)
+      @description = value
     end
 
-    def to_swagger_hash
-      raise(NotImplementedError)
+    def extends(value)
+      @descriptor = value
     end
 
-    def to_h
-      raise(NotImplementedError)
+    def required(field, options={})
+      property(field, { required: true }.merge(options))
     end
 
-    def to_json
-      MultiJson.dump(to_h)
+    def optional(field, options={})
+      property(field, { required: false }.merge(options))
     end
 
-    def to_swagger_json
-      MultiJson.dump(to_swagger_hash)
+    def property(field, options={})
+      properties[field] = Skeleton::Schema.new(options)
     end
   end
 end

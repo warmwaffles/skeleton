@@ -1,47 +1,29 @@
-require 'skeleton/model'
-require 'skeleton/scopes'
+require 'skeleton/attributes'
+require 'skeleton/scope'
 
 module Skeleton
-  class SecurityScheme < Model
-    attr_accessor :type, :description, :name, :location, :flow, :authorization_url,
-                  :token_url, :scopes
+  class SecurityScheme
+    extend Skeleton::Attributes
 
-    attr_presence :type, :description, :name, :location, :flow, :authorization_url,
-                  :token_url, :scopes
+    attr_accessor :type, :description, :name, :location, :flow,
+      :authorization_url, :token_url
 
-    def scopes=(value)
-      case value
-      when Hash
-        @scopes = Skeleton::Scopes.new(value)
-      else
-        @scopes = value
+    attr_presence :type, :description, :name, :location, :flow,
+      :authorization_url, :token_url
+
+    def initialize(args={})
+      @scopes = {}
+
+      args.each do |k, v|
+        setter = "#{k}="
+        self.send(setter, v) if self.respond_to?(setter)
       end
     end
 
-    def to_h
-      hash = {}
-      hash[:type]              = type              if type?
-      hash[:description]       = description       if description?
-      hash[:name]              = name              if name?
-      hash[:location]          = location          if location?
-      hash[:flow]              = flow              if flow?
-      hash[:authorization_url] = authorization_url if authorization_url?
-      hash[:token_url]         = token_url         if token_url?
-      hash[:scopes]            = scopes.to_h       if scopes?
-      hash
-    end
-
-    def to_swagger_hash
-      hash = {}
-      hash[:type]              = type              if type?
-      hash[:description]       = description       if description?
-      hash[:name]              = name              if name?
-      hash[:location]          = location          if location?
-      hash[:flow]              = flow              if flow?
-      hash[:authorizationUrl]  = authorization_url if authorization_url?
-      hash[:tokenUrl]          = token_url         if token_url?
-      hash[:scopes]            = scopes.to_swagger_hash if scopes?
-      hash
+    def define_scope(name, &block)
+      @scopes[name] = Skeleton::Scope.new
+      @scopes[name].instance_eval(&block)
+      @scopes[name]
     end
   end
 end

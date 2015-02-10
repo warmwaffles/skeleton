@@ -7,88 +7,162 @@ running code.
 
 ```ruby
 # You would put this somewhere such as config/initializers/skeleton.rb
-Skeleton.configure do |config|
-  config.define do |structure|
-    structure.host = 'api.example.com'
-    structure.base_path = '/foo'
+structure = Skeleton.build do |s|
+  s.title = 'KISSmetrics API'
+  s.version = '1.0.0'
+  s.description = 'A simply complex skeleton'
 
-    structure.schemes = %w(https)
-    structure.consumes = %(application/json)
-    structure.produces = %(application/json)
-  end
+  s.terms = 'https://www.kissmetrics.com/terms'
 
-  config.info do |info|
-    info.version = '1.0.6'
-    info.title = 'An Example API'
-    info.description = 'An api to interact with data'
-    info.terms_of_service = 'https://api.example.com/terms/'
-  end
+  s.contact.name = 'KISSmetrics'
+  s.contact.email = 'support@kissmetrics.com'
+  s.contact.url = 'https://support.kissmetrics.com'
 
-  config.contact do |contact|
-    contact.name = 'WarmWaffles'
-    contact.email = 'warmwaffles@gmail.com'
-    contact.url = 'https://github.com/warmwaffles/skeleton'
-  end
+  s.license.name = 'KISSmetrics'
+  s.license.url = 'https://www.kissmetrics.com'
 
-  config.license do |license|
-    license.name = 'MIT'
-  end
+  s.host = 'api.kissmetrics.com'
+  s.base_path = '/core'
+  s.scheme(:https)
+  s.consume('application/json')
+  s.produce('application/json')
 end
 ```
 
-Inside of your rails controller you would do the following
+## Defining models
 
 ```ruby
-class ApplicationController < ActionController::Base
-  include Skeleton::Helpers::ControllerHelpers
+structure.define_model('Link') do
+  describe('The link object used for api discovery')
+  required(:href,      type: 'string')
+  required(:rel,       type: 'string')
+  optional(:templated, type: 'boolean')
+  optional(:name,      type: 'string')
+end
+
+structure.define_model('Error') do
+  describe('Represents an error')
+  required(:message, type: 'string')
+  optional(:field,   type: 'string')
+  optional(:errors,  type: 'array', items: { ref: 'Error' })
+end
+
+structure.define_model('Meta') do
+  describe('The meta information regarding the request')
+  required(:status,  type: 'integer')
+  optional(:message, type: 'string')
+  optional(:errors,  type: 'array', items: { ref: 'Error' })
 end
 ```
 
-Inside a controller that you wish to document do the following
+If you wish to reference a definition from within another model, all you need to
+do is to pass a `:ref`. If you want to know more about this structure, please
+see the swagger documentation.
+
+## Defining paths
 
 ```ruby
-class AccountsController < ApplicationController
-  define_api_path('/accounts') do |path|
-    path.get do |operation|
-      operation.tag('account')
-      operation.description = 'List all of the accounts available to you'
+skeleton.define_path('/products') do
+  get do
+    identify('list-products')
+    tag('product')
+    summarize('List products')
+    describe('List all of the products')
 
-      operation.parameter(:query, 'limit') do |p|
-        p.description = 'maximum number of results to return'
-        p.type = 'integer'
-        p.format = 'int32'
-        p.required = false
-      end
-      operation.parameter(:query, 'offset') do |p|
-        p.description = 'offset within the results returned'
-        p.type = 'integer'
-        p.format = 'int32'
-        p.required = false
-      end
+    parameters(:query) do
+      optional(:limit,  type: 'integer', format: 'int32', default: 20, maximum: 50, minimum: 0)
+      optional(:offset, type: 'integer', format: 'int32', default: 0)
+    end
+
+    response(200, default: true) do
+      describe('Product list')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+      schema(ref: 'Product')
+    end
+
+    response(403) do
+      describe('Unauthorized')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+      schema(ref: 'ErrorResponse')
     end
   end
 
-  define_api_path('/accounts/{account_id}') do |path|
-    path.get do |operation|
-      operation.tag('account')
-      operation.description = 'Get an account'
-      operation.parameter(:query, 'account_id') do |p|
-        p.description = 'The account id'
-        p.type = 'string'
-        p.format = 'uuid'
-        p.required = true
-      end
+  head do
+    tag('product')
+    summarize('List products headers')
+    describe('List the headers for the products action')
+
+    parameters(:query) do
+      optional(:limit,  type: 'integer', format: 'int32', default: 20, maximum: 50, minimum: 0)
+      optional(:offset, type: 'integer', format: 'int32', default: 0)
     end
 
-    path.options do |operation|
-      operation.tag('account')
-      operation.description = 'Show available options for the account'
-      operation.parameter(:query, 'account_id') do |p|
-        p.description = 'The account id'
-        p.type = 'string'
-        p.format = 'uuid'
-        p.required = true
-      end
+    response(200, default: true) do
+      describe('Product list')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+    end
+
+    response(403) do
+      describe('Unauthorized')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+    end
+  end
+
+  post do
+    tag('product')
+    summarize('Create product')
+    describe('Create a product')
+
+    parameters(:body) do
+      required(:body, schema: { ref: 'NewProduct' })
+    end
+
+    response(201) do
+      describe('Product created')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+      schema(ref: 'Product')
+    end
+
+    response(400) do
+      describe('Client error')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+      schema(ref: 'ErrorResponse')
+    end
+
+    response(403) do
+      describe('Unauthorized')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+      schema(ref: 'ErrorResponse')
+    end
+  end
+
+  options do
+    tag('product')
+    summarize('List actions for a product')
+    describe('List actions for a product')
+
+    parameters(:query) do
+      optional(:limit,  type: 'integer', format: 'int32', default: 20, maximum: 50, minimum: 0)
+      optional(:offset, type: 'integer', format: 'int32', default: 0)
+    end
+
+    response(200, default: true) do
+      describe('Product action list')
+      header('Allow', type: 'array', items: { type: 'string' }, collection_format: 'csv')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+      schema(ref: 'OptionsResponse')
+    end
+
+    response(400) do
+      describe('Client error')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+      schema(ref: 'ErrorResponse')
+    end
+
+    response(403) do
+      describe('Unauthorized')
+      header('Link', type: 'string', description: 'The list of links for the resource')
+      schema(ref: 'ErrorResponse')
     end
   end
 end
@@ -102,7 +176,8 @@ class DocumentationController < ApplicationController
   def swagger
     respond_to do |format|
       format.json do
-        render(json: Skeleton.config.to_swagger_json, status: 200)
+        serializer = Skeleton::Serializers::Swagger.new(my_structure)
+        render(json: MultiJson.dump(serializer.to_h), status: 200)
       end
     end
   end
